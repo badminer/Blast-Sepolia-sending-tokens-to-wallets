@@ -1,1 +1,1 @@
-# Blast-Sepolia-sending-tokens-to-wallets
+Sending tokens from a single wallet in the Blast test network.
