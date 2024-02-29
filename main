@@ -1,0 +1,35 @@
+from web3 import Web3
+from eth_account import Account
+from eth_utils import to_checksum_address
+
+web3 = Web3(Web3.HTTPProvider('https://sepolia.blast.io'))
+
+with open('private.txt', 'r') as f:
+    private_key_sender = f.read().strip()
+
+with open('wallet.txt', 'r') as f:
+    recipient_addresses = [to_checksum_address(line.strip()) for line in f]
+
+sender_address = Account.from_key(private_key_sender).address
+
+# Сумма для отправки в wei (0.01 ETH = 0.01 * 10^18 wei)
+amount_in_wei = web3.to_wei(0.05, 'ether')
+
+gas_price = web3.eth.gas_price
+nonce = web3.eth.get_transaction_count(sender_address)
+
+for recipient_address in recipient_addresses:
+    transaction = {
+        'to': recipient_address,
+        'value': amount_in_wei,
+        'gas': 21000,
+        'gasPrice': gas_price,
+        'nonce': nonce,
+        'chainId': 168587773,
+    }
+
+    signed_transaction = Account.sign_transaction(transaction, private_key_sender)
+
+    transaction_hash = web3.eth.send_raw_transaction(signed_transaction.rawTransaction)
+    print(f'Transaction sent to {recipient_address}. Transaction hash: {transaction_hash.hex()}')
+    nonce += 1
